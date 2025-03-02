@@ -87,46 +87,22 @@ def get_loss_fn(num_classes):
   return classification_loss_fn
 
 
-def get_dataset_fn(input_file_pattern,
-                   max_seq_length,
-                   global_batch_size,
-                   is_training,
-                   label_type=tf.int64,
-                   include_sample_weights=False):
+def get_dataset_fn(input_file_pattern, max_seq_length, global_batch_size, is_training, label_type=tf.int64, include_sample_weights=False):
   """Gets a closure to create a dataset."""
 
   def _dataset_fn(ctx=None):
     """Returns tf.data.Dataset for distributed BERT pretraining."""
     batch_size = ctx.get_per_replica_batch_size(
         global_batch_size) if ctx else global_batch_size
-    dataset = input_pipeline.create_classifier_dataset(
-        tf.io.gfile.glob(input_file_pattern),
-        max_seq_length,
-        batch_size,
-        is_training=is_training,
-        input_pipeline_context=ctx,
-        label_type=label_type,
-        include_sample_weights=include_sample_weights)
+    dataset = input_pipeline.create_classifier_dataset(tf.io.gfile.glob(input_file_pattern), max_seq_length, batch_size, is_training=is_training, input_pipeline_context=ctx, label_type=label_type, include_sample_weights=include_sample_weights)
     return dataset
 
   return _dataset_fn
 
 
-def run_bert_classifier(strategy,
-                        bert_config,
-                        input_meta_data,
-                        model_dir,
-                        epochs,
-                        steps_per_epoch,
-                        steps_per_loop,
-                        eval_steps,
-                        warmup_steps,
-                        initial_lr,
-                        init_checkpoint,
-                        train_input_fn,
-                        eval_input_fn,
-                        training_callbacks=True,
-                        custom_callbacks=None,
+def run_bert_classifier(strategy, bert_config, input_meta_data, model_dir, epochs, steps_per_epoch, 
+                        steps_per_loop, eval_steps, warmup_steps, initial_lr, init_checkpoint, 
+                        train_input_fn, eval_input_fn, training_callbacks=True, custom_callbacks=None, 
                         custom_metrics=None):
   """Run BERT classifier training using low-level API."""
   max_seq_length = input_meta_data['max_seq_length']
@@ -194,20 +170,9 @@ def run_bert_classifier(strategy,
       custom_callbacks=custom_callbacks)
 
 
-def run_keras_compile_fit(model_dir,
-                          strategy,
-                          model_fn,
-                          train_input_fn,
-                          eval_input_fn,
-                          loss_fn,
-                          metric_fn,
-                          init_checkpoint,
-                          epochs,
-                          steps_per_epoch,
-                          steps_per_loop,
-                          eval_steps,
-                          training_callbacks=True,
-                          custom_callbacks=None):
+def run_keras_compile_fit(model_dir, strategy, model_fn, train_input_fn, eval_input_fn, loss_fn, 
+                          metric_fn, init_checkpoint, epochs, steps_per_epoch, steps_per_loop, 
+                          eval_steps, training_callbacks=True, custom_callbacks=None):
   """Runs BERT classifier model using Keras compile/fit API."""
 
   with strategy.scope():
@@ -260,11 +225,7 @@ def run_keras_compile_fit(model_dir,
     return bert_model, stats
 
 
-def get_predictions_and_labels(strategy,
-                               trained_model,
-                               eval_input_fn,
-                               is_regression=False,
-                               return_probs=False):
+def get_predictions_and_labels(strategy, trained_model, eval_input_fn, is_regression=False, return_probs=False):
   """Obtains predictions of trained model on evaluation data.
 
   Note that list of labels is returned along with the predictions because the
@@ -327,8 +288,7 @@ def get_predictions_and_labels(strategy,
   return predictions, labels
 
 
-def export_classifier(model_export_path, input_meta_data, bert_config,
-                      model_dir):
+def export_classifier(model_export_path, input_meta_data, bert_config, model_dir):
   """Exports a trained model as a `SavedModel` for inference.
 
   Args:
@@ -358,14 +318,7 @@ def export_classifier(model_export_path, input_meta_data, bert_config,
       model_export_path, model=classifier_model, checkpoint_dir=model_dir)
 
 
-def run_bert(strategy,
-             input_meta_data,
-             model_config,
-             train_input_fn=None,
-             eval_input_fn=None,
-             init_checkpoint=None,
-             custom_callbacks=None,
-             custom_metrics=None):
+def run_bert(strategy, input_meta_data, model_config, train_input_fn=None, eval_input_fn=None, init_checkpoint=None, custom_callbacks=None, custom_metrics=None):
   """Run BERT training."""
   # Enables XLA in Session Config. Should not be set for TPU.
   keras_utils.set_session_config(FLAGS.enable_xla)
@@ -439,17 +392,8 @@ def custom_main(custom_callbacks=None, custom_metrics=None):
                       FLAGS.model_dir)
     return
 
-  strategy = distribution_utils.get_distribution_strategy(
-      distribution_strategy=FLAGS.distribution_strategy,
-      num_gpus=FLAGS.num_gpus,
-      tpu_address=FLAGS.tpu)
-  eval_input_fn = get_dataset_fn(
-      FLAGS.eval_data_path,
-      input_meta_data['max_seq_length'],
-      FLAGS.eval_batch_size,
-      is_training=False,
-      label_type=label_type,
-      include_sample_weights=include_sample_weights)
+  strategy = distribution_utils.get_distribution_strategy( distribution_strategy=FLAGS.distribution_strategy, num_gpus=FLAGS.num_gpus, tpu_address=FLAGS.tpu)
+  eval_input_fn = get_dataset_fn(FLAGS.eval_data_path, input_meta_data['max_seq_length'], FLAGS.eval_batch_size, is_training=False, label_type=label_type, include_sample_weights=include_sample_weights)
 
   if FLAGS.mode == 'predict':
     num_labels = input_meta_data.get('num_labels', 1)
@@ -465,12 +409,7 @@ def custom_main(custom_callbacks=None, custom_metrics=None):
                    'checkpoint', latest_checkpoint_file)
       checkpoint.restore(
           latest_checkpoint_file).assert_existing_objects_matched()
-      preds, _ = get_predictions_and_labels(
-          strategy,
-          classifier_model,
-          eval_input_fn,
-          is_regression=(num_labels == 1),
-          return_probs=True)
+      preds, _ = get_predictions_and_labels(strategy, classifier_model, eval_input_fn, is_regression=(num_labels == 1), return_probs=True)
     output_predict_file = os.path.join(FLAGS.model_dir, 'test_results.tsv')
     with tf.io.gfile.GFile(output_predict_file, 'w') as writer:
       logging.info('***** Predict results *****')
@@ -483,21 +422,9 @@ def custom_main(custom_callbacks=None, custom_metrics=None):
 
   if FLAGS.mode != 'train_and_eval':
     raise ValueError('Unsupported mode is specified: %s' % FLAGS.mode)
-  train_input_fn = get_dataset_fn(
-      FLAGS.train_data_path,
-      input_meta_data['max_seq_length'],
-      FLAGS.train_batch_size,
-      is_training=True,
-      label_type=label_type,
-      include_sample_weights=include_sample_weights)
-  run_bert(
-      strategy,
-      input_meta_data,
-      bert_config,
-      train_input_fn,
-      eval_input_fn,
-      custom_callbacks=custom_callbacks,
-      custom_metrics=custom_metrics)
+  train_input_fn = get_dataset_fn(FLAGS.train_data_path, input_meta_data['max_seq_length'], FLAGS.train_batch_size,is_training=True, label_type=label_type, include_sample_weights=include_sample_weights)
+  
+  run_bert(strategy, input_meta_data, bert_config, train_input_fn, eval_input_fn, custom_callbacks=custom_callbacks,custom_metrics=custom_metrics)
 
 
 def main(_):

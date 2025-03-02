@@ -56,15 +56,7 @@ def single_file_dataset(input_file, name_to_features):
   return d
 
 
-def create_pretrain_dataset(input_patterns,
-                            seq_length,
-                            max_predictions_per_seq,
-                            batch_size,
-                            is_training=True,
-                            input_pipeline_context=None,
-                            use_next_sentence_label=True,
-                            use_position_id=False,
-                            output_fake_labels=True):
+def create_pretrain_dataset(input_patterns, seq_length, max_predictions_per_seq, batch_size, is_training=True, input_pipeline_context=None, use_next_sentence_label=True, use_position_id=False, output_fake_labels=True):
   """Creates input dataset from (tf)records files for pretraining."""
   name_to_features = {
       'input_ids':
@@ -150,13 +142,7 @@ def create_pretrain_dataset(input_patterns,
   return dataset
 
 
-def create_classifier_dataset(file_path,
-                              seq_length,
-                              batch_size,
-                              is_training=True,
-                              input_pipeline_context=None,
-                              label_type=tf.int64,
-                              include_sample_weights=False):
+def create_classifier_dataset(file_path, seq_length, batch_size, is_training=True, input_pipeline_context=None, label_type=tf.int64, include_sample_weights=False):
   """Creates input dataset from (tf)records files for train/eval."""
   name_to_features = {
       'input_ids': tf.io.FixedLenFeature([seq_length], tf.int64),
@@ -198,11 +184,7 @@ def create_classifier_dataset(file_path,
   return dataset
 
 
-def create_squad_dataset(file_path,
-                         seq_length,
-                         batch_size,
-                         is_training=True,
-                         input_pipeline_context=None):
+def create_squad_dataset(file_path, seq_length, batch_size, is_training=True, input_pipeline_context=None):
   """Creates input dataset from (tf)records files for train/eval."""
   name_to_features = {
       'input_ids': tf.io.FixedLenFeature([seq_length], tf.int64),
@@ -249,10 +231,7 @@ def create_squad_dataset(file_path,
   return dataset
 
 
-def create_retrieval_dataset(file_path,
-                             seq_length,
-                             batch_size,
-                             input_pipeline_context=None):
+def create_retrieval_dataset(file_path, seq_length, batch_size, input_pipeline_context=None):
   """Creates input dataset from (tf)records files for scoring."""
   name_to_features = {
       'input_ids': tf.io.FixedLenFeature([seq_length], tf.int64),
