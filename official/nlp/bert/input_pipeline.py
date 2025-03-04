@@ -36,11 +36,13 @@ def decode_record(record, name_to_features):
   return example
 
 
-def single_file_dataset(input_file, name_to_features):
+def single_file_dataset(input_file, name_to_features, num_samples=None):
   """Creates a single-file dataset to be passed for BERT custom training."""
   # For training, we want a lot of parallel reading and shuffling.
   # For eval, we want no shuffling and parallel reading doesn't matter.
   d = tf.data.TFRecordDataset(input_file)
+  if num_samples:
+    d = d.take(num_samples)
   d = d.map(
       lambda record: decode_record(record, name_to_features),
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
@@ -142,7 +144,7 @@ def create_pretrain_dataset(input_patterns, seq_length, max_predictions_per_seq,
   return dataset
 
 
-def create_classifier_dataset(file_path, seq_length, batch_size, is_training=True, input_pipeline_context=None, label_type=tf.int64, include_sample_weights=False):
+def create_classifier_dataset(file_path, seq_length, batch_size, is_training=True, input_pipeline_context=None, label_type=tf.int64, include_sample_weights=False, num_samples=None):
   """Creates input dataset from (tf)records files for train/eval."""
   name_to_features = {
       'input_ids': tf.io.FixedLenFeature([seq_length], tf.int64),
@@ -152,7 +154,7 @@ def create_classifier_dataset(file_path, seq_length, batch_size, is_training=Tru
   }
   if include_sample_weights:
     name_to_features['weight'] = tf.io.FixedLenFeature([], tf.float32)
-  dataset = single_file_dataset(file_path, name_to_features)
+  dataset = single_file_dataset(file_path, name_to_features, num_samples=num_samples)
 
   # The dataset is always sharded by number of hosts.
   # num_input_pipelines is the number of hosts rather than number of cores.

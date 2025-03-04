@@ -74,6 +74,9 @@ flags.DEFINE_integer(
     'evaluated every N/n samples.')
 flags.DEFINE_integer('train_batch_size', 32, 'Batch size for training.')
 flags.DEFINE_integer('eval_batch_size', 32, 'Batch size for evaluation.')
+flags.DEFINE_integer('train_data_size', None, 'Number of training samples '
+                     'to use. If None, uses the full train data. '
+                     '(default: None).')
 
 common_flags.define_common_bert_flags()
 
@@ -98,14 +101,14 @@ def get_loss_fn(num_classes):
   return classification_loss_fn
 
 
-def get_dataset_fn(input_file_pattern, max_seq_length, global_batch_size, is_training, label_type=tf.int64, include_sample_weights=False):
+def get_dataset_fn(input_file_pattern, max_seq_length, global_batch_size, is_training, label_type=tf.int64, include_sample_weights=False, num_samples=None):
   """Gets a closure to create a dataset."""
 
   def _dataset_fn(ctx=None):
     """Returns tf.data.Dataset for distributed BERT pretraining."""
     batch_size = ctx.get_per_replica_batch_size(
         global_batch_size) if ctx else global_batch_size
-    dataset = input_pipeline.create_classifier_dataset(tf.io.gfile.glob(input_file_pattern), max_seq_length, batch_size, is_training=is_training, input_pipeline_context=ctx, label_type=label_type, include_sample_weights=include_sample_weights)
+    dataset = input_pipeline.create_classifier_dataset(tf.io.gfile.glob(input_file_pattern), max_seq_length, batch_size, is_training=is_training, input_pipeline_context=ctx, label_type=label_type, include_sample_weights=include_sample_weights, num_samples=num_samples)
     return dataset
 
   return _dataset_fn
@@ -338,6 +341,9 @@ def run_bert(strategy, input_meta_data, model_config, train_input_fn=None, eval_
   epochs = FLAGS.num_train_epochs * FLAGS.num_eval_per_epoch
   train_data_size = (
       input_meta_data['train_data_size'] // FLAGS.num_eval_per_epoch)
+  if FLAGS.train_data_size:
+    train_data_size = min(train_data_size, FLAGS.train_data_size)
+    logging.info('Updated train_data_size: %s', train_data_size)
   steps_per_epoch = int(train_data_size / FLAGS.train_batch_size)
   warmup_steps = int(epochs * train_data_size * 0.1 / FLAGS.train_batch_size)
   eval_steps = int(
@@ -433,7 +439,7 @@ def custom_main(custom_callbacks=None, custom_metrics=None):
 
   if FLAGS.mode != 'train_and_eval':
     raise ValueError('Unsupported mode is specified: %s' % FLAGS.mode)
-  train_input_fn = get_dataset_fn(FLAGS.train_data_path, input_meta_data['max_seq_length'], FLAGS.train_batch_size,is_training=True, label_type=label_type, include_sample_weights=include_sample_weights)
+  train_input_fn = get_dataset_fn(FLAGS.train_data_path, input_meta_data['max_seq_length'], FLAGS.train_batch_size,is_training=True, label_type=label_type, include_sample_weights=include_sample_weights, num_samples=FLAGS.train_data_size)
   
   run_bert(strategy, input_meta_data, bert_config, train_input_fn, eval_input_fn, custom_callbacks=custom_callbacks,custom_metrics=custom_metrics)
 
