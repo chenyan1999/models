@@ -29,14 +29,25 @@ from absl import logging
 import gin
 import tensorflow as tf
 from official.modeling import performance
-from official.nlp import optimization
-from official.nlp.bert import bert_models
 from official.nlp.bert import common_flags
 from official.nlp.bert import configs as bert_configs
 from official.nlp.bert import input_pipeline
 from official.nlp.bert import model_saving_utils
 from official.utils.misc import distribution_utils
 from official.utils.misc import keras_utils
+
+"""
+Following imports are commented out to prevent dependency errors during testing. 
+You can ignore it as it does not need any edit and does not affect your user study.
+"""
+# from official.nlp import optimization
+# from official.nlp.bert import bert_models
+"""
+Above imports are commented out to prevent dependency errors during testing. 
+You can ignore it as it does not need any edit and does not affect your user study.
+
+Following is the normal code where you should find where and how to edit.
+"""
 
 flags.DEFINE_enum(
     'mode', 'train_and_eval', ['train_and_eval', 'export_only', 'predict'],
