@@ -21,6 +21,12 @@ pip install absl-py==1.4.0
 
 如果你觉得修改的次数不够，可以继续修改，直到实现编辑目标（即通过 [验证修改](#验证修改) 中的测试）
 
+## 编辑描述
+当你需要输入编辑描述时，你可以直接复制以下内容：
+```
+Add a flag to control the number of train examples.
+```
+你也可以输入其他内容，如果您使用的是 TRACE 或 CoEdPilot，请勿输入 ASCII 以外的字符。
 
 ## 温馨提示
 1. `FLAGS.train_data_size` 的默认值是 `None`，可能被设置的比实际训练集样本数量大，请注意这一点。
