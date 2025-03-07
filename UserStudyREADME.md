@@ -3,8 +3,8 @@
 ## 环境配置
 请通过以下命令配置环境，用于测试编辑结果：
 ```bash
-conda create --name user_study python=3.11 -y
-conda activate user_study
+conda create --name user_study_models python=3.11 -y
+conda activate user_study_models
 pip install tensorflow==2.18.0
 pip install gin-config
 pip install absl-py==1.4.0
