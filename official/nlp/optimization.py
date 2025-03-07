@@ -22,7 +22,7 @@ import re
 from absl import logging
 import gin
 import tensorflow as tf
-import tensorflow_addons.optimizers as tfa_optimizers
+# import tensorflow_addons.optimizers as tfa_optimizers
 
 
 class WarmUp(tf.keras.optimizers.schedules.LearningRateSchedule):
