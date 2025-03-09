@@ -15,6 +15,11 @@ pip install absl-py==1.4.0
 
 ![image](./images/init_edit.png)
 
+你可以直接复制以下内容完成修改
+```python
+  train_input_fn = get_dataset_fn(FLAGS.train_data_path, input_meta_data['max_seq_length'], FLAGS.train_batch_size,is_training=True, label_type=label_type, include_sample_weights=include_sample_weights, num_samples=FLAGS.train_data_size)
+```
+
 请你在完成所示修改后，继续对项目进行 **另外 8 处** 修改。你可以打开源代码管理工具，查看修改的数量，确保你确实完成了 8 处修改，如图所示：
 
 ![image](./images/git_diff.png)
