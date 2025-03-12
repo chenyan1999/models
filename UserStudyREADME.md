@@ -11,7 +11,7 @@ pip install absl-py==1.4.0
 ```
 
 ## 任务介绍
-我们希望添加一个新的参数 `num_samples` 来控制加载的训练集样本数量。首个编辑发生在 [`official/nlp/bert/run_classifier.py`](official/nlp/bert/run_classifier.py) 文件中，我们为函数 `get_dataset_fn` 添加了新的参数 `num_samples`，由尚未定义的 `FLAGS.train_data_size` 传入，如图所示：
+我们希望添加一个新的参数 `num_samples` 来控制加载的**训练集**样本数量。首个编辑发生在 [`official/nlp/bert/run_classifier.py`](official/nlp/bert/run_classifier.py) 文件中，我们为函数 `get_dataset_fn` 添加了新的参数 `num_samples`，由尚未定义的 `FLAGS.train_data_size` 传入，如图所示：
 
 ![image](./images/init_edit.png)
 
@@ -44,6 +44,7 @@ Add a flag to control the number of train examples.
     dataset = dataset.take(num_samples)
     ```
 4. 为了优化数据集加载效率，请在从文件加载数据集之后，立刻控制数据集的样本数量。
+5. 只需要给**训练集**添加该参数
 
 ## 验证修改
 请运行以下命令验证修改：
